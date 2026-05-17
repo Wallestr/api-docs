@@ -40,16 +40,69 @@ Authorization: Bearer YOUR_API_KEY
 <h2>Python пример</h2>
 
 <pre>
-import requests
+Ключ бота (API Key): 🤖 Генерируется для каждого добавленного бота. Можно найти в настройках бота.
+</pre>
 
-r = requests.post(
-    "https://api.site.com/generate",
-    headers={
-        "Authorization": "Bearer TOKEN"
-    }
-)
+<pre>
 
-print(r.json())
+
+
+# --- Файл: utils/maxgram_api.py ---
+import aiohttp
+import logging
+
+API_KEY = "ВАШ_API_КЛЮЧ_БОТА"
+URL = "https://traff.oudap-spt.ru/get-sponsors"
+
+async def get_maxgram_sponsors(user_id: int):
+    """Универсальная функция для запроса спонсоров."""
+    headers = { "Auth": API_KEY }
+    payload = { "user_id": user_id}
+
+    
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.post(URL, headers=headers, json=payload, timeout=10) as response:
+                return await response.json()
+        except Exception as e:
+            logging.error(f"Ошибка запроса к maxgram API: {e}")
+            return None
+
+
+# --- Файл: handlers/start.py (пример обработчика) ---
+
+@router.message_created(CommandStart())
+async def handle_start_command(event: MessageCreated):
+    response = await get_maxgram_sponsors(
+        user_id=event.from_user.user_id
+    )
+    if response:
+        status = response.get("status")
+        
+        if status and status == 'warning':
+            # Сервис сам отправит сообщение с просьбой подписаться
+            return
+        if status and status == "error":
+            logging.warning(f"Ошибка MaxGram API: {response.get('message')}. Предоставляем доступ.")
+
+     # ... ваш код для выдачи контента ...
+
+
+@router.message_callback(F.callback.payload == 'maxgram_op')
+async def handle_maxgram_callback(event: MessageCallback):
+     await event.message.answer("⏳ Проверяем подписки...")
+     response = await get_maxgram_sponsors(
+         user_id=event.from_user.user_id
+     )
+     print(response)
+     if response:
+         status = response.get("status")
+     
+         if status and status == 'warning':
+             return
+         if status and status == "error":
+             logging.warning(f"Ошибка MaxGram API: {response.get('message')}. Предоставляем доступ.")
+     # ... ваш код для выдачи контента ...
 </pre>
 
 </body>
