@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>API Docs</title>
+  <style>
+    body {
+      font-family: Arial;
+      max-width: 900px;
+      margin: auto;
+      padding: 40px;
+      background: #111;
+      color: white;
+    }
+
+    pre {
+      background: #222;
+      padding: 15px;
+      border-radius: 10px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Подключение API</h1>
+
+<h2>Endpoint</h2>
+
+<pre>
+POST https://api.site.com/generate
+</pre>
+
+<h2>Headers</h2>
+
+<pre>
+Authorization: Bearer YOUR_API_KEY
+</pre>
+
+<h2>Python пример</h2>
+
+<pre>
+import requests
+
+r = requests.post(
+    "https://api.site.com/generate",
+    headers={
+        "Authorization": "Bearer TOKEN"
+    }
+)
+
+print(r.json())
+</pre>
+
+</body>
+</html>
